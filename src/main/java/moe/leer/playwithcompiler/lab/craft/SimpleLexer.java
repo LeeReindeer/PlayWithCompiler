@@ -24,12 +24,13 @@ public class SimpleLexer {
     lexer.tokenize("in > 115");
     lexer.print();
 
+    lexer.tokenize("2+3*5");
+    lexer.print();
+
     lexer.tokenize("int$ 100"); // illegal
   }
 
-
   public void tokenize(String stream) {
-    System.out.println("Parsing: " + stream);
 
     DfaState dfaState = DfaState.Initial;
 
@@ -60,6 +61,13 @@ public class SimpleLexer {
           break;
         case Assignment:
         case GE:
+        case Plus:
+        case Minus:
+        case Star:
+        case Slash:
+        case SemiColon:
+        case LeftParen:
+        case RightParen:
           dfaState = saveTokenThenInitState(ch);
           break;
         case IntLiteral:
@@ -148,6 +156,34 @@ public class SimpleLexer {
       dfaState = DfaState.GT;
       currToken.type = TokenType.GT;
       tokenText.append(ch);
+    } else if (ch == '+') {
+      dfaState = DfaState.Plus;
+      currToken.type = TokenType.Plus;
+      tokenText.append(ch);
+    } else if (ch == '-') {
+      dfaState = DfaState.Minus;
+      currToken.type = TokenType.Minus;
+      tokenText.append(ch);
+    } else if (ch == '*') {
+      dfaState = DfaState.Star;
+      currToken.type = TokenType.Star;
+      tokenText.append(ch);
+    } else if (ch == '/') {
+      dfaState = DfaState.Slash;
+      currToken.type = TokenType.Slash;
+      tokenText.append(ch);
+    } else if (ch == ';') {
+      dfaState = DfaState.SemiColon;
+      currToken.type = TokenType.SemiColon;
+      tokenText.append(ch);
+    } else if (ch == '(') {
+      dfaState = DfaState.LeftParen;
+      currToken.type = TokenType.LeftParen;
+      tokenText.append(ch);
+    } else if (ch == ')') {
+      dfaState = DfaState.RightParen;
+      currToken.type = TokenType.RightParen;
+      tokenText.append(ch);
     } else if (ch == '=') {
       dfaState = DfaState.Assignment;
       currToken.type = TokenType.Assignment;
@@ -168,8 +204,18 @@ public class SimpleLexer {
   }
 
   enum DfaState {
-    Initial, Id_int1, Id_int2, Id_int3, Id, GT, GE,
-    Assignment, // =
+    Initial,
+
+    If, Id_if1, Id_if2, Else, Id_else1, Id_else2, Id_else3, Id_else4, Int, Id_int1, Id_int2, Id_int3, Id, GT, GE,
+
+    Assignment,
+
+    Plus, Minus, Star, Slash,
+
+    SemiColon,
+    LeftParen,
+    RightParen,
+
     IntLiteral
   }
 
