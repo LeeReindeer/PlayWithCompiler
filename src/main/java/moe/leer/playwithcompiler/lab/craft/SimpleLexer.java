@@ -30,7 +30,7 @@ public class SimpleLexer {
     lexer.tokenize("int$ 100"); // illegal
   }
 
-  public void tokenize(String stream) {
+  public SimpleTokenReader tokenize(String stream) {
 
     DfaState dfaState = DfaState.Initial;
 
@@ -122,6 +122,8 @@ public class SimpleLexer {
       currToken.text = tokenText.toString();
       tokens.add(currToken);
     }
+
+    return new SimpleTokenReader(tokens);
   }
 
   /**
