@@ -115,7 +115,7 @@ public class SimpleCalculator {
    * <p>
    * additiveExpression
    * : multiplicativeExpression
-   * | multiplicativeExpression Plus additiveExpression
+   * | multiplicativeExpression Plus additiveExpression         // additiveExpression 写在右边来避免左递归，但是会造成结合性问题
    * ;
    *
    * @param tokens
