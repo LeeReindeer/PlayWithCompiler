@@ -117,6 +117,23 @@ public class SimpleCalculator {
    * : multiplicativeExpression
    * | multiplicativeExpression Plus additiveExpression         // additiveExpression 写在右边来避免左递归，但是会造成结合性问题
    * ;
+   * <p>
+   * 改写为：
+   * add
+   * :  mul |  add'
+   * ;
+   * <p>
+   * add'
+   * : + mul add' | ε
+   * ;
+   * <p>
+   * ε (epsilon) 表示空集
+   * <p>
+   * 再改写为NBNF:
+   * <p>
+   * add: mul (+ mul)*;
+   * * 表示重复零次或多次
+   * 使用循环来代理递归
    *
    * @param tokens
    * @return
@@ -124,19 +141,19 @@ public class SimpleCalculator {
   private SimpleASTNode additive(TokenReader tokens) {
     SimpleASTNode child1 = multiplicative(tokens);
     SimpleASTNode node = child1;
-    Token token = tokens.peek(); // 没有第二个节点，直接返回
-    if (child1 != null && token != null) {
-      if (token.getType() == TokenType.Plus || token.getType() == TokenType.Minus) {
-        token = tokens.read();
-        SimpleASTNode child2 = additive(tokens);
-        if (child2 != null) {
-          node = new SimpleASTNode(ASTNodeType.Additive, token.getText()); // + or -
-          node.addChild(child1); // multiplicative
-          // plus
-          node.addChild(child2); // additive
-        } else {
+    if (child1 != null) {
+      Token token;
+      while ((token = tokens.peek()) != null &&
+          (token.getType() == TokenType.Plus || token.getType() == TokenType.Minus)) {
+        token = tokens.read(); // read '+' or '-'
+        SimpleASTNode child2 = multiplicative(tokens);
+        if (child2 == null) {
           throw new IllegalStateException("invalid additive expression, expecting the right part");
         }
+        node = new SimpleASTNode(ASTNodeType.Additive, token.getText()); // + or -
+        node.addChild(child1);
+        node.addChild(child2);
+        child1 = node; // let it be the left child
       }
     }
     return node;
@@ -146,6 +163,10 @@ public class SimpleCalculator {
    * multiplicativeExpression
    * :  primaryExpression
    * |  primaryExpression Star multiplicativeExpression
+   * <p>
+   * <p>
+   * mul
+   * : pri (Star pri)*
    *
    * @param tokens
    * @return
@@ -153,19 +174,18 @@ public class SimpleCalculator {
   private SimpleASTNode multiplicative(TokenReader tokens) {
     SimpleASTNode child1 = primary(tokens);
     SimpleASTNode node = child1;
-    Token token = tokens.peek();
-    if (child1 != null && token != null) {
-      if (token.getType() == TokenType.Star || token.getType() == TokenType.Slash) {
-        tokens.read();
-        SimpleASTNode child2 = multiplicative(tokens);
-        if (child2 != null) {
-          node = new SimpleASTNode(ASTNodeType.Multiplicative, token.getText()); // * or /
-          node.addChild(child1);
-          node.addChild(child2);
-        } else {
-          throw new IllegalStateException("invalid multiplicative expression, expecting the right part");
-        }
+    Token token;
+    while ((token = tokens.peek()) != null &&
+        (token.getType() == TokenType.Star || token.getType() == TokenType.Slash)) {
+      tokens.read();
+      SimpleASTNode child2 = primary(tokens);
+      if (child2 == null) {
+        throw new IllegalStateException("invalid multiplicative expression, expecting the right part");
       }
+      node = new SimpleASTNode(ASTNodeType.Multiplicative, token.getText()); // * or /
+      node.addChild(child1);
+      node.addChild(child2);
+      child1 = node;
     }
     return node;
   }
