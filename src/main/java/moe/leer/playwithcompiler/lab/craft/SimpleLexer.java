@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 词法分析，将输入流分解成 token
+ *
  * @author leer
  * Created at 11/11/19 3:27 PM
  */

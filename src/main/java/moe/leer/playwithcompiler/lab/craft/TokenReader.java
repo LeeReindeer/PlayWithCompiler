@@ -21,6 +21,13 @@ public interface TokenReader {
   void unread();
 
   /**
+   * @see #setPosition(int)
+   */
+  default void unread2(int pos) {
+    setPosition(pos);
+  }
+
+  /**
    * 获取Token流当前的读取位置。
    *
    * @return
