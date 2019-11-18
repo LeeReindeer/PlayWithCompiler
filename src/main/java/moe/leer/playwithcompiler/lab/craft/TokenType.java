@@ -22,6 +22,11 @@ public enum TokenType {
   RightParen,// )
 
   Assignment,// =
+  PlusAssignment,// +=
+  MinusAssignment,// -=
+
+  PlusUnary,//++
+  MinusUnary,//--
 
   If,
   Else,

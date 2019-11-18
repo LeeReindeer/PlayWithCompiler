@@ -29,6 +29,21 @@ public class SimpleLexer {
     lexer.tokenize("2+3*5");
     lexer.print();
 
+    lexer.tokenize("int a -= 2");
+    lexer.print();
+
+    lexer.tokenize("int a = -1");
+    lexer.print();
+
+    lexer.tokenize("int a = --c");
+    lexer.print();
+
+    lexer.tokenize("int a = c++");
+    lexer.print();
+
+    lexer.tokenize("int a += 1;");
+    lexer.print();
+
     lexer.tokenize("int$ 100"); // illegal
   }
 
@@ -61,10 +76,39 @@ public class SimpleLexer {
             dfaState = saveTokenThenInitState(ch);
           }
           break;
+        case Plus:
+          if (ch == '=') {
+            currToken.type = TokenType.PlusAssignment;
+            dfaState = DfaState.MinusAssignment;
+            tokenText.append(ch);
+          } else if (ch == '+') {
+            currToken.type = TokenType.PlusUnary;
+            dfaState = DfaState.PlusPlus;
+            tokenText.append(ch);
+          } else {
+            dfaState = saveTokenThenInitState(ch);
+          }
+          break;
+        case Minus:
+          if (ch == '=') {
+            currToken.type = TokenType.MinusAssignment;
+            dfaState = DfaState.PlusAssignment;
+            tokenText.append(ch);
+          } else if (ch == '-') {
+            currToken.type = TokenType.MinusUnary;
+            dfaState = DfaState.MinusMinus;
+            tokenText.append(ch);
+          } else {
+            dfaState = saveTokenThenInitState(ch);
+          }
+          break;
+        // 终结符，可接受的Token
+        case PlusAssignment:
+        case MinusAssignment:
+        case MinusMinus:
+        case PlusPlus:
         case Assignment:
         case GE:
-        case Plus:
-        case Minus:
         case Star:
         case Slash:
         case SemiColon:
@@ -212,7 +256,11 @@ public class SimpleLexer {
 
     If, Id_if1, Id_if2, Else, Id_else1, Id_else2, Id_else3, Id_else4, Int, Id_int1, Id_int2, Id_int3, Id, GT, GE,
 
-    Assignment,
+    Assignment,// =
+    PlusAssignment,// +=
+    MinusAssignment,// -=
+    PlusPlus,//++
+    MinusMinus,//--
 
     Plus, Minus, Star, Slash,
 

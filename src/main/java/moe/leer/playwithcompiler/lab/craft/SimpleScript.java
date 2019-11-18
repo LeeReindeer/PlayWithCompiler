@@ -42,6 +42,9 @@ public class SimpleScript {
           scriptText.setLength(0);
         }
       } catch (Throwable t) {
+        if (script.debug) {
+          t.printStackTrace();
+        }
         System.out.println(t.getMessage());
         scriptText.setLength(0);
       }
@@ -86,18 +89,37 @@ public class SimpleScript {
           result = value1 / value2;
         }
         break;
-      case Identifier:
+      case PlusUnary:
+        // ++a
         String varName = node.getText();
-        if (intVariableMap.containsKey(varName)) {
-          Integer value = intVariableMap.get(varName);
-          if (value != null) {
-            result = intVariableMap.get(varName);
-          } else {
-            throw new IllegalStateException("variable " + varName + " is not initialized");
-          }
-        } else {
-          throw new IllegalStateException("variable " + varName + " is not declared");
-        }
+        int var = getVariable(varName) + 1;
+        setVariable(varName, var);
+        result = var;
+        break;
+      case MinusUnary:
+        // --a
+        varName = node.getText();
+        var = getVariable(varName) - 1;
+        setVariable(varName, var);
+        result = var;
+        break;
+      case UnaryPlus:
+        // a++
+        varName = node.getText();
+        var = getVariable(varName);
+        setVariable(varName, var + 1);
+        result = var;
+        break;
+      case UnaryMinus:
+        // a--
+        varName = node.getText();
+        var = getVariable(varName);
+        setVariable(varName, var - 1);
+        result = var;
+        break;
+      case Identifier:
+        varName = node.getText();
+        result = getVariable(varName);
         break;
       case IntLiteral:
         result = Integer.parseInt(node.getText());
@@ -118,6 +140,13 @@ public class SimpleScript {
           intVariableMap.put(varName, null);
         }
         break;
+      case NegativeExpression:
+        // fixme
+        if (node.getType() == ASTNodeType.NegativeExpression) {
+          result = evaluate(node.getChildren().get(0), indent + "\t");
+          result = -result;
+        }
+        break;
       default:
         break;
     }
@@ -133,6 +162,22 @@ public class SimpleScript {
     return result;
   }
 
+  private void setVariable(String varName, Integer val) {
+    intVariableMap.put(varName, val);
+  }
+
+  private int getVariable(String varName) {
+    if (intVariableMap.containsKey(varName)) {
+      Integer value = intVariableMap.get(varName);
+      if (value != null) {
+        return intVariableMap.get(varName);
+      } else {
+        throw new IllegalStateException("variable " + varName + " is not initialized");
+      }
+    } else {
+      throw new IllegalStateException("variable " + varName + " is not declared");
+    }
+  }
 
   private void logd(String s) {
     if (this.debug) {

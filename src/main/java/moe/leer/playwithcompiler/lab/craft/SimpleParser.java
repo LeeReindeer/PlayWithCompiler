@@ -45,6 +45,34 @@ public class SimpleParser {
       System.out.println(t.getMessage());
     }
 
+    try {
+      script = "int a = - --b;";
+      System.out.println("parse: " + script);
+      tree = parser.parse(script);
+      parser.dumpAST(tree, "|", "-");
+    } catch (Throwable t) {
+      System.out.println(t.getMessage());
+    }
+
+    try {
+      script = "int a = 1 - --b;";
+      System.out.println("parse: " + script);
+      tree = parser.parse(script);
+      parser.dumpAST(tree, "|", "-");
+    } catch (Throwable t) {
+      System.out.println(t.getMessage());
+    }
+
+    try {
+      script = "int a = ---b;"; // error
+      System.out.println("parse: " + script);
+      tree = parser.parse(script);
+      parser.dumpAST(tree, "|", "-");
+    } catch (Throwable t) {
+      t.printStackTrace();
+      System.out.println(t.getMessage());
+    }
+
     //测试异常语法
     try {
       script = "2+3+;";
@@ -225,21 +253,21 @@ public class SimpleParser {
 
   /**
    * multiplicativeExpression
-   * :  primaryExpression
-   * |  primaryExpression Star multiplicativeExpression
+   * :  unary
+   * |  unary Star multiplicativeExpression
    * <p>
    * <p>
    * mul
-   * : pri (Star pri)*
+   * : unary (Star unary)*
    */
   private SimpleASTNode multiplicative(TokenReader tokens) {
-    SimpleASTNode child1 = primary(tokens);
+    SimpleASTNode child1 = unary(tokens);
     SimpleASTNode node = child1;
     Token token;
     while ((token = tokens.peek()) != null &&
         (token.getType() == TokenType.Star || token.getType() == TokenType.Slash)) {
       tokens.read();
-      SimpleASTNode child2 = primary(tokens);
+      SimpleASTNode child2 = unary(tokens);
       if (child2 == null) {
         throw new IllegalStateException("invalid multiplicative expression, expecting the right part");
       }
@@ -252,10 +280,47 @@ public class SimpleParser {
   }
 
   /**
+   * unary: primary | ++primary | --primary;
+   */
+  private SimpleASTNode unary(TokenReader tokens) {
+    SimpleASTNode node = null;
+    Token token = tokens.peek();
+
+    if (token == null) return node;
+    if (token.getType() == TokenType.PlusUnary) {
+      tokens.read();
+      Token next = tokens.peek();
+      if (next != null && next.getType() == TokenType.Identifier) { // Identifier only
+        tokens.read(); // read id
+        // only create one node
+        node = new SimpleASTNode(ASTNodeType.PlusUnary, next.getText());
+      } else {
+        throw new IllegalStateException("variable expected");
+      }
+    } else if (token.getType() == TokenType.MinusUnary) {
+      tokens.read();
+      Token next = tokens.peek();
+      if (next != null && next.getType() == TokenType.Identifier) { // Identifier only
+        tokens.read(); // read id
+        // only create one node
+        node = new SimpleASTNode(ASTNodeType.MinusUnary, next.getText());
+      } else {
+        throw new IllegalStateException("variable expected");
+      }
+    } else {
+      node = primary(tokens);
+    }
+    return node;
+  }
+
+  /**
    * primaryExpression
    * :  IntLiteral
    * | Identifier
+   * | Identifier++
+   * | Identifier--
    * | LeftParen additiveExpression RightParen
+   * | '-' primaryExpression
    */
   private SimpleASTNode primary(TokenReader tokens) {
     SimpleASTNode node = null;
@@ -269,6 +334,25 @@ public class SimpleParser {
     } else if (token.getType() == TokenType.Identifier) {
       token = tokens.read();
       node = new SimpleASTNode(ASTNodeType.Identifier, token.getText());
+
+      Token next = tokens.peek();
+      if (next == null) return node;
+      if (next.getType() == TokenType.PlusUnary) {
+        tokens.read();
+        node = new SimpleASTNode(ASTNodeType.UnaryPlus, token.getText());
+      } else if (next.getType() == TokenType.MinusUnary) {
+        tokens.read();
+        node = new SimpleASTNode(ASTNodeType.UnaryMinus, token.getText());
+      }
+    } else if (token.getType() == TokenType.Minus) {
+      token = tokens.read();
+      SimpleASTNode child = unary(tokens);
+      if (child != null) {
+        node = new SimpleASTNode(ASTNodeType.NegativeExpression, token.getText());
+        node.addChild(child);
+      } else {
+        throw new IllegalStateException("illegal negative expression");
+      }
     } else if (token.getType() == TokenType.LeftParen) {
       tokens.read(); // read "("
       node = additive(tokens); // re top-down

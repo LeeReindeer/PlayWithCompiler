@@ -9,7 +9,17 @@ public enum ASTNodeType {
 
   IntDeclaration,     //整型变量声明
   ExpressionStmt,     //表达式语句，即表达式后面跟个分号
+  NegativeExpression,    // 负数，负表达式
+
   AssignmentStmt,     //赋值语句
+  PlusAssignmentStmt,// +=
+  MinusAssignmentStmt,// -=
+
+  //unary operators
+  PlusUnary,//++a
+  MinusUnary,//--a
+  UnaryPlus, //a++
+  UnaryMinus, //a--
 
   Primary,            //基础表达式
   Multiplicative,     //乘法表达式
