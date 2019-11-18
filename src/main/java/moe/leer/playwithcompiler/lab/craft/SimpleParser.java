@@ -121,12 +121,11 @@ public class SimpleParser {
           token = tokens.read(); // read =
           SimpleASTNode child = additive(tokens);
           if (child == null) {
-            // todo
             throw new IllegalStateException("invalid variable initialization, expecting an expression");
           } else {
             node.addChild(child);
           }
-        }
+        } // 变量初始化部分可以没有
       } else {
         throw new IllegalStateException("variable name expected");
       }

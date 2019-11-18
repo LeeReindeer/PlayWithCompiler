@@ -110,8 +110,8 @@ public class SimpleScript {
         // fallthrough
       case IntDeclaration:
         varName = node.getText();
-        child1 = node.getChildren().get(0);
-        if (child1 != null) {
+        if (node.getChildren() != null && !node.getChildren().isEmpty()) {
+          child1 = node.getChildren().get(0);
           result = evaluate(child1, indent + "\t");
           intVariableMap.put(varName, result);
         } else {
@@ -123,10 +123,10 @@ public class SimpleScript {
     }
     if (debug) {
       System.out.println(indent + "Result: " + result);
-    } else if (indent.equals("\t")) { // 顶层的语句
+    } else if (indent.equals("\t")) { // 第二层的语句（顶层是program）
       if (node.getType() == ASTNodeType.IntDeclaration || node.getType() == ASTNodeType.AssignmentStmt) {
         System.out.println(node.getText() + ": " + result);
-      }else if (node.getType() != ASTNodeType.Programm){
+      } else {
         System.out.println(result);
       }
     }
