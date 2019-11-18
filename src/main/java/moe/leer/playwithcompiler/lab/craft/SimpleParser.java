@@ -188,7 +188,7 @@ public class SimpleParser {
   }
 
   /**
-   * assignmentStatement : Identifier '=' additiveExpression ';';
+   * assignmentStatement : Identifier ('='|'+='|'-=') additiveExpression ';';
    */
   private SimpleASTNode assignmentStatement(TokenReader tokens) {
     SimpleASTNode node = null;
@@ -196,11 +196,20 @@ public class SimpleParser {
     if (token != null && token.getType() == TokenType.Identifier) {
       Token id = tokens.read();
       token = tokens.peek();
-      if (token != null && token.getType() == TokenType.Assignment) {
+      if (token != null &&
+          (token.getType() == TokenType.Assignment ||
+              token.getType() == TokenType.PlusAssignment ||
+              token.getType() == TokenType.MinusAssignment
+          )) {
         tokens.read();
         SimpleASTNode child = additive(tokens);
         if (child != null) {
-          node = new SimpleASTNode(ASTNodeType.AssignmentStmt, id.getText());
+          node = switch (token.getType()) {
+            case Assignment -> new SimpleASTNode(ASTNodeType.AssignmentStmt, id.getText());
+            case PlusAssignment -> new SimpleASTNode(ASTNodeType.PlusAssignmentStmt, id.getText());
+            case MinusAssignment -> new SimpleASTNode(ASTNodeType.MinusAssignmentStmt, id.getText());
+            default -> throw new IllegalStateException("Unexpected value: " + token.getType());
+          };
           node.addChild(child);
 
           // 验证分号

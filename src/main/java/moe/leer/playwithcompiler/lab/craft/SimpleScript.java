@@ -125,19 +125,33 @@ public class SimpleScript {
         result = Integer.parseInt(node.getText());
         break;
       case AssignmentStmt:
+      case PlusAssignmentStmt:
+      case MinusAssignmentStmt:
         varName = node.getText();
         if (!intVariableMap.containsKey(varName)) {
           throw new IllegalStateException("variable " + varName + " is not declared");
         }
-        // fallthrough
+        var = getVariable(varName);
+        child1 = node.getChildren().get(0);
+        result = evaluate(child1, indent + "\t");
+        if (node.getType() == ASTNodeType.PlusAssignmentStmt) {
+          setVariable(varName, var + result);
+          result = var + result;
+        } else if (node.getType() == ASTNodeType.MinusAssignmentStmt) {
+          setVariable(varName, var - result);
+          result = var - result;
+        } else {
+          setVariable(varName, result);
+        }
+        break;
       case IntDeclaration:
         varName = node.getText();
         if (node.getChildren() != null && !node.getChildren().isEmpty()) {
           child1 = node.getChildren().get(0);
           result = evaluate(child1, indent + "\t");
-          intVariableMap.put(varName, result);
+          setVariable(varName, result);
         } else {
-          intVariableMap.put(varName, null);
+          setVariable(varName, null);
         }
         break;
       case NegativeExpression:
