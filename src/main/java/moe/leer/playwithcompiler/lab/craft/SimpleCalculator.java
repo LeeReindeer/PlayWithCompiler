@@ -210,7 +210,7 @@ public class SimpleCalculator {
       node = new SimpleASTNode(ASTNodeType.IntLiteral, token.getText());
     } else if (token.getType() == TokenType.Identifier) {
       token = tokens.read();
-      node = new SimpleASTNode(ASTNodeType.IntLiteral, token.getText());
+      node = new SimpleASTNode(ASTNodeType.Identifier, token.getText());
     } else if (token.getType() == TokenType.LeftParen) {
       tokens.read(); // read "("
       node = additive(tokens); // re top-down
