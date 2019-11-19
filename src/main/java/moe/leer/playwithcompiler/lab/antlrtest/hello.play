@@ -1,0 +1,4 @@
+int age = 21;
+if (age <= 5+10*5){
+  printf("Hello young man!");
+}
