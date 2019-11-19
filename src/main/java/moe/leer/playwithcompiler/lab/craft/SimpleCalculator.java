@@ -120,7 +120,7 @@ public class SimpleCalculator {
    * <p>
    * 改写为：
    * add
-   * :  mul |  add'
+   * :  mul add'
    * ;
    * <p>
    * add'
