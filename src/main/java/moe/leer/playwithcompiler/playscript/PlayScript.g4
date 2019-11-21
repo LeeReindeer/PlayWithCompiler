@@ -98,10 +98,10 @@ blockStatement
 
 statement
     : blockLabel=block
-    | IF parExpression statement (ELSE statement)?
+    | IF parBooleanExpression statement (ELSE statement)?
     //todo switch
     | FOR '(' forBlock ')' statement
-    | WHILE parExpression statement
+    | WHILE parBooleanExpression statement
     | DO statement WHILE parExpression
     | RETURN expression? ';'
     | BREAK IDENTIFIER? ';'
@@ -128,6 +128,10 @@ forInit
 
 parExpression
     : '(' expression ')'
+    ;
+
+parBooleanExpression
+    : '(' booleanExpression ')'
     ;
 
 booleanExpression
