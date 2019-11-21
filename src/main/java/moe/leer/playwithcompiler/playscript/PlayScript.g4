@@ -14,7 +14,7 @@ functionDeclare
 
 functionBody
     : block
-    | ';'
+//    | ';'
     ;
 
 qualifiedNameList
@@ -46,8 +46,8 @@ qualifiedName
     ;
 
 fieldDeclare
-    //: typeType variableDeclarators ';'
-    : variableDeclarators ';'
+    //: typeType variableDeclarators
+    : variableDeclarators
     ;
 
 constructorDeclare
@@ -90,7 +90,7 @@ blockStatements
     ;
 
 blockStatement
-    : variableDeclarators ';'
+    : variableDeclarators
     | statement
     | functionDeclare
 //    | classDeclare
@@ -103,10 +103,10 @@ statement
     | FOR '(' forBlock ')' statement
     | WHILE parBooleanExpression statement
     | DO statement WHILE parExpression
-    | RETURN expression? ';'
-    | BREAK IDENTIFIER? ';'
-    | SEMI
-    | statementExpression=expression ';' // 表达式语句
+    | RETURN expression?
+    | BREAK IDENTIFIER?
+//    | SEMI
+    | statementExpression=expression // 表达式语句
     | identifierLabel=IDENTIFIER ':' statement // label
     ;
 
@@ -136,6 +136,7 @@ parBooleanExpression
 
 booleanExpression
     : BOOL_LITERAL
+    | IDENTIFIER
     | expression ('<' '<' | '>' '>' '>' | '>' '>') expression // <<, >>>, >>
     | expression bop=('<=' | '>=' | '>' | '<') expression
     | expression bop=('==' | '!=') expression
@@ -149,6 +150,7 @@ expression
     : primary
     | expression '[' expression ']' // array
     | functionCall
+    | '(' expression ')'
     | expression postfix=('++'|'--')
     | prefix=('+'|'-'|'++'|'--') expression
     | prefix=('!'|'~') expression
